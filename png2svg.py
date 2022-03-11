@@ -29,7 +29,7 @@ def normalize(a):
     return tuple(map(operator.truediv, a, [mag]*len(a)))
 
 def svg_header(width, height):
-    return '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg" version="1.1">' % (width, height)
+    return '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n<svg width="%d" height="%d" xmlns="http://www.w3.org/2000/svg" version="1.1">\n' % (width, height)
 
 def joined_edges(assorted_edges, keep_every_point=False):
     pieces = []
@@ -149,7 +149,7 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
                     here = edge[0]
                     s.write(' L %d,%d ' % here)
                 s.write(' Z ')
-            s.write(' " style="fill:rgb%s; fill-opacity:%.3f; stroke:none;" />\n""' % (color[0:3], float(color[3]) / 255))
+            s.write(' " style="fill:rgb%s; fill-opacity:%.3f; stroke:none;" />\n' % (color[0:3], float(color[3]) / 255))
             
     s.write('</svg>\n')
     return s.getvalue()
