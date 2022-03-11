@@ -171,7 +171,6 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: %s [Input FILE] [OUT FILE]" % sys.argv[0].split('/')[-1])
         sys.exit(0)
-	
     SVG_Writing = concurrent.futures.ThreadPoolExecutor(max_workers=None)
     SVG_Writing.submit(SVG_Write, sys.argv[1], sys.argv[2])
     SVG_Writing.shutdown()
