@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, operator
+import sys, operator, concurrent.futures
 from collections import deque
 from io import StringIO
 from PIL import Image
-from threading import Thread
 
 def add_tuple(a, b):
     return tuple(map(operator.add, a, b))
@@ -164,19 +163,15 @@ def png_to_svg(filename):
     
     return rgba_image_to_svg_contiguous(im_rgba, None, None)
 
-class SVG_Thread(Thread):
-    def __init__(self, InputFileName, OutputFileName):
-        Thread.__init__(self)
-        self.InputFileName = InputFileName
-        self.OutputFileName = OutputFileName
-    def run(self):
-        with open(self.OutputFileName, "w") as svg:
-            svg.write(png_to_svg(self.InputFileName))
+def SVG_Write(InputFileName, OutputFileName):
+    with open(OutputFileName, "w") as svg:
+        svg.write(png_to_svg(InputFileName))
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: %s [Input FILE] [OUT FILE]" % sys.argv[0].split('/')[-1])
         sys.exit(0)
-    SVG_Writing = SVG_Thread(sys.argv[1], sys.argv[2])
-    SVG_Writing.start()
-    SVG_Writing.join()
+	
+    SVG_Writing = concurrent.futures.ThreadPoolExecutor(max_workers=None)
+    SVG_Writing.submit(SVG_Write, sys.argv[1], sys.argv[2])
+    SVG_Writing.shutdown()
