@@ -4,6 +4,9 @@
 import sys, operator, concurrent.futures
 from collections import deque
 from PIL import Image
+from os import cpu_count
+
+Max_Workers = cpu_count() * 10
 
 def add_tuple(a, b):
     return tuple(map(operator.add, a, b))
@@ -23,7 +26,7 @@ def magnitude(a):
 def normalize(a):
     mag = magnitude(a)
     if not mag > 0:
-        print("Cannot normalize a zero-length vector")
+        print('Cannot normalize a zero-length vector')
         sys.exit(1)
     return tuple(map(operator.truediv, a, [mag]*len(a)))
 
@@ -61,9 +64,8 @@ def joined_edges(assorted_edges, keep_every_point=False):
                     piece = []
                 break
         else:
-            raise Exception("Failed to find connecting edge")
+            raise Exception('Failed to find connecting edge')
     return pieces
-
 
 def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
     adjacent = ((1, 0), (0, 1), (-1, 0), (0, -1))
@@ -99,7 +101,6 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
             if not rgba in color_pixel_lists:
                 color_pixel_lists[rgba] = []
             color_pixel_lists[rgba].append(piece)
-
     del adjacent
     del visited
     edges = {
@@ -124,19 +125,14 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
             if not rgba in color_edge_lists:
                 color_edge_lists[rgba] = []
             color_edge_lists[rgba].append(edge_set)
-
     del color_pixel_lists
     del edges
-
     color_joined_pieces = {}
-
     for color, pieces in list(color_edge_lists.items()):
         color_joined_pieces[color] = []
         for assorted_edges in pieces:
             color_joined_pieces[color].append(joined_edges(assorted_edges, keep_every_point))
-
     s = [svg_header(*im.size)]
-
     for color, shapes in list(color_joined_pieces.items()):
         for shape in shapes:
             s.append(' <path d=" ')
@@ -161,14 +157,11 @@ def png_to_svg(filename):
 
     return rgba_image_to_svg_contiguous(im_rgba, None, None)
 
-def SVG_Write(InputFileName, OutputFileName):
-    with open(OutputFileName, "w") as svg:
-        svg.write(png_to_svg(InputFileName))
-
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: %s [Input FILE] [OUT FILE]" % sys.argv[0].split('/')[-1])
+        print('Usage: %s [Input FILE] [OUT FILE]' % sys.argv[0].split('/')[-1])
         sys.exit(0)
-    SVG_Writing = concurrent.futures.ThreadPoolExecutor(max_workers=None)
-    SVG_Writing.submit(SVG_Write, sys.argv[1], sys.argv[2])
+    SVG_Writing = concurrent.futures.ThreadPoolExecutor(max_workers=Max_Workers)
+    with open(sys.argv[2], 'w') as svg:
+        svg.write(SVG_Writing.submit(png_to_svg,sys.argv[1]).result())
     SVG_Writing.shutdown()
