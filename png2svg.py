@@ -150,7 +150,7 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
                     s.write(' L %d,%d ' % here)
                 s.write(' Z ')
             s.write(' " style="fill:rgb%s; fill-opacity:%.3f; stroke:none;" />\n' % (color[0:3], float(color[3]) / 255))
-            
+
     s.write('</svg>\n')
     return s.getvalue()
 
@@ -160,7 +160,7 @@ def png_to_svg(filename):
     except IOError as e:
         sys.stderr.write('%s: Could not open as image file\n' % filename)
         sys.exit(1)
-    
+
     return rgba_image_to_svg_contiguous(im_rgba, None, None)
 
 def SVG_Write(InputFileName, OutputFileName):
