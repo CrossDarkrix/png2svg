@@ -3,7 +3,6 @@
 
 import sys, operator, concurrent.futures
 from collections import deque
-from io import StringIO
 from PIL import Image
 
 def add_tuple(a, b):
@@ -136,23 +135,22 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
         for assorted_edges in pieces:
             color_joined_pieces[color].append(joined_edges(assorted_edges, keep_every_point))
 
-    s = StringIO()
-    s.write(svg_header(*im.size))
+    s = [svg_header(*im.size)]
 
     for color, shapes in list(color_joined_pieces.items()):
         for shape in shapes:
-            s.write(' <path d=" ')
+            s.append(' <path d=" ')
             for sub_shape in shape:
                 here = sub_shape.pop(0)[0]
-                s.write(' M %d,%d ' % here)
+                s.append(' M %d,%d ' % here)
                 for edge in sub_shape:
                     here = edge[0]
-                    s.write(' L %d,%d ' % here)
-                s.write(' Z ')
-            s.write(' " style="fill:rgb%s; fill-opacity:%.3f; stroke:none;" />\n' % (color[0:3], float(color[3]) / 255))
+                    s.append(' L %d,%d ' % here)
+                s.append(' Z ')
+            s.append(' " style="fill:rgb%s; fill-opacity:%.3f; stroke:none;" />\n' % (color[0:3], float(color[3]) / 255))
 
-    s.write('</svg>\n')
-    return s.getvalue()
+    s.append('</svg>\n')
+    return ''.join(s)
 
 def png_to_svg(filename):
     try:
