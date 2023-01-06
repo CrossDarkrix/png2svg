@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys, operator, concurrent.futures
+import sys, operator
 from collections import deque
 from PIL import Image
-from os import cpu_count
 
-Max_Workers = cpu_count() * 10
+background = (255, 255, 255) # white color
 
 def add_tuple(a, b):
     return tuple(map(operator.add, a, b))
@@ -78,6 +77,7 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
             if visited.getpixel(here):
                 continue
             rgba = im.getpixel((x, y))
+            if rgba[:3] == background: continue # skip background color
             if opaque and not rgba[3]:
                 continue
             piece = []
@@ -113,13 +113,14 @@ def rgba_image_to_svg_contiguous(im, opaque=None, keep_every_point=False):
     for rgba, pieces in list(color_pixel_lists.items()):
         for piece_pixel_list in pieces:
             edge_set = set([])
+            set_p = set(piece_pixel_list)
             for coord in piece_pixel_list:
                 for offset, (start_offset, end_offset) in list(edges.items()):
                     neighbour = add_tuple(coord, offset)
                     start = add_tuple(coord, start_offset)
                     end = add_tuple(coord, end_offset)
                     edge = (start, end)
-                    if neighbour in piece_pixel_list:
+                    if neighbour in set_p:
                         continue
                     edge_set.add(edge)
             if not rgba in color_edge_lists:
@@ -161,7 +162,5 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print('Usage: %s [Input FILE] [OUT FILE]' % sys.argv[0].split('/')[-1])
         sys.exit(0)
-    SVG_Writing = concurrent.futures.ThreadPoolExecutor(max_workers=Max_Workers)
     with open(sys.argv[2], 'w') as svg:
-        svg.write(SVG_Writing.submit(png_to_svg,sys.argv[1]).result())
-    SVG_Writing.shutdown()
+        svg.write(png_to_svg(sys.argv[1]))
